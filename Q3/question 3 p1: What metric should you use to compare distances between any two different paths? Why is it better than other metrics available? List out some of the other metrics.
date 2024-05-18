@@ -1,0 +1,9 @@
+In IN a 2D grid of constrained straight interlocking paths, the **Frechet Distance** is the preferred metric for comparing distances between any two different paths.
+It is superior because it considers the order and continuity of points along the paths, accurately capturing their shapes and structures. Other metrics include:
+
+1. Hausdorff Distance: Measures the greatest distance between points on two paths.
+2. Euclidean distance: measures the straight-line distance between corresponding points.
+3. Dynamic time Warping (DTW):Aligns sequences of different lengths, but may distort path shapes.
+4. Edit Distance (Levenshtein Distance)  : Measures the minimum operations needed to transform one sequence into another. 
+
+While these metrics have their uses, they often lack the ability to comprehensively capture the geometric similarity of paths, making the Frechet Distance a more suitable choice for this scenario.
