@@ -2,3 +2,4 @@
 Cosine Similarity is the most commmonly used "likeliness" metric used for words or strings .
 This measures the cosine of the angle between two vectors, which represent the words in a high-dimensional space.
 It's often used in Natural Language Processing (NLP) tasks like document similarity or word similarity.
+More , the cosine value of the vectors of the words, more mathematically alike they are. 
