@@ -24,7 +24,7 @@ def cosine_similarity(embedding1, embedding2):
 embeddings = load_embeddings("glove.6B.50d.txt")
 
 # Choose some example words
-word_list = ["happiness", "success", "sadness", "failure", "joy", "achievement", "defeat", "unhappiness","sorrow"]
+word_list = ["happiness", "success", "sadness", "failure", "joy", "achievement", "unhappiness","sorrow","apple","banana"]
 
 # Compute cosine similarity between pairs of example words
 similarities = {}
