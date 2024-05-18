@@ -1,0 +1,10 @@
+Visual-based Transformers (VITs) and Convolutional Neural Networks (CNNs) are both used for image processing, but they differ in their architecture and operation.
+VITs utilize self-attention mechanisms to capture global relationships in images, while CNNs rely on convolutional layers to extract local features.
+VITs excel at modeling global context from the start, whereas CNNs gradually build hierarchical representations from local features.
+Diff b/w VITs & CNNs,
+
+Global vs. Local Processing:
+
+VITs focus on capturing global relationships and long-range dependencies in images from the outset through self-attention mechanisms.
+
+CNNs excel at extracting local features and spatial hierarchies through convolutional filters, gradually building up to more complex representations.
