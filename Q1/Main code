@@ -1,0 +1,92 @@
+import tensorflow as tf
+from tensorflow.keras.applications import ResNet50
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Dense, Flatten
+from tensorflow.keras.utils import image_dataset_from_directory
+
+# Define data paths and parameters
+data_dir = 'C:/Users/saubh/data/VOCdevkit/VOC2012'
+test_size = 0.2
+batch_size = 32
+image_size = (300, 300, 3)
+# Load the dataset
+train_dataset = image_dataset_from_directory(
+    data_dir,
+    seed=123,
+    shuffle=True,  # Set shuffle to True for training
+    validation_split=test_size,
+    subset="training",
+    labels='inferred',
+    color_mode='rgb',
+    image_size=image_size
+)
+val_dataset = image_dataset_from_directory(
+    data_dir,
+    seed=123,
+    shuffle=False,
+    validation_split=test_size,
+    subset="validation",
+    labels='inferred',
+    color_mode='rgb',
+    image_size=image_size
+)
+
+# Preprocess data (modify based on your data structure)
+def preprocess_data(image, label):
+    image = tf.cast(image, tf.float32) / 255.0
+    new_size = [300, 300]  
+    # Assuming desired size (replace with your logic)
+    image = tf.image.resize(image, new_size)
+    # ... adjust based on your data structure for bbox and label
+    return image, (image, label)
+
+train_dataset = train_dataset.map(preprocess_data).batch(batch_size).prefetch(1)
+val_dataset = val_dataset.map(preprocess_data).batch(batch_size).prefetch(1)
+
+def resize_and_augment(image, label):
+ # Resize the image to the desired shape
+  image = tf.image.resize(image, (300, 300,3))
+
+  # You can add random augmentations here (e.g., random flip, color jittering)
+  # ...
+
+  return image, label
+train_dataset = train_dataset.map(resize_and_augment).batch(batch_size).prefetch(1)
+val_dataset = val_dataset.map(resize_and_augment).batch(batch_size).prefetch(1)
+# Create model
+def create_model():
+    base_model = ResNet50(input_shape=image_size(300,300,3), include_top=False, weights='imagenet')
+    x = Flatten()(base_model.output)
+    x = Dense(1024, activation='relu')(x)
+
+    bbox_output = Dense(4, activation='sigmoid', name='bbox')(x)
+    class_output = Dense(20, activation='softmax', name='class')(x)
+
+    model = Model(inputs=base_model.input, outputs=[bbox_output, class_output])
+    return model
+
+model = create_model()
+
+model.compile(optimizer='adam', 
+              loss={'bbox': 'mse', 'class': 'sparse_categorical_crossentropy'}, 
+              metrics={'class': 'accuracy'})
+
+history = model.fit(train_dataset, validation_data=val_dataset, epochs=10)
+
+import numpy as np
+from sklearn.metrics import precision_score, recall_score, average_precision_score
+
+# Use a batch from the validation dataset for evaluation
+val_images, val_labels = next(iter(val_dataset.unbatch().batch(len(val_dataset))))
+
+# Get predictions
+pred_bbox, pred_class = model.predict(val_images)
+
+true_class = np.argmax(val_labels, axis=-1)
+pred_class = np.argmax(pred_class, axis=-1)
+
+precision = precision_score(true_class, pred_class, average='macro')
+recall = recall_score(true_class, pred_class, average='macro')
+# mAP = average_precision_score(true_class, pred_class, average='macro')  # This line is commented out because average_precision_score is not suitable for multiclass classification problems
+
+print(f'Precision: {precision}, Recall: {recall}')
