@@ -19,3 +19,11 @@ https://www.tensorflow.org/text/tutorials/word2vec
 Question 1)
 Tried a lot ,first I tried to automatically download the Pascal VOCdevkit 2012, but it didnot work as it stopped automatically in the middle but then I tried to do it manually by putting the VOCdevkit folder in the
 same as the code file, but still it didnot work , so i tried it without using the VOCfile but still didnot work. Unfinished code is uploaded. I also learnt about VITs and how they are different from CNNs.
+
+Question 2)
+I learnt about concepts like Natural learning processing and how do I impliment it in this problem,I also learnt about RAG.
+
+FEW Sources:
+https://youtu.be/fLvJ8VdHLA0?feature=shared
+https://youtu.be/T-D1OfcDW1M?feature=shared
+https://research.ibm.com/blog/retrieval-augmented-generation-RAG
