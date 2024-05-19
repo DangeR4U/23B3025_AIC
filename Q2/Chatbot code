@@ -1,0 +1,86 @@
+# Import necessary libraries
+from sentence_transformers import SentenceTransformer, util
+import faiss
+from transformers import GPT2Tokenizer, GPT2LMHeadModel
+import torch
+
+# Load pre-trained models
+embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
+text_tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
+response_model = GPT2LMHeadModel.from_pretrained('gpt2')
+
+# Example corpus
+corpus = [
+  "The Pacific Ocean is the largest and deepest ocean on Earth.",
+    "Mount Everest is the highest mountain above sea level.",
+    "The Amazon Rainforest is the largest tropical rainforest in the world.",
+    "Shakespeare wrote Romeo and Juliet."
+]
+
+# Encode documents and build the FAISS index
+corpus_embeddings = embedding_model.encode(corpus, convert_to_tensor=True)
+faiss_index = faiss.IndexFlatL2(corpus_embeddings.shape[1])
+faiss_index.add(corpus_embeddings.cpu().numpy())
+
+# Function to get relevant context from documents
+def fetch_relevant_context(query, top_k=1):
+    query_embedding = embedding_model.encode(query, convert_to_tensor=True).cpu().numpy()
+    if query_embedding.ndim == 1:
+        query_embedding = query_embedding.reshape(1, -1)
+    distances, indices = faiss_index.search(query_embedding, top_k)
+    return [corpus[i] for i in indices[0]]
+
+# Function to generate responses
+def create_response(prompt, context=None, max_length=50):
+    if context:
+        prompt = f"{context} {prompt}"
+    inputs = text_tokenizer.encode(prompt, return_tensors='pt')
+    outputs = response_model.generate(inputs, max_length=max_length, num_return_sequences=1, no_repeat_ngram_size=2)
+    response = text_tokenizer.decode(outputs[0], skip_special_tokens=True)
+    return response
+
+# Function to clean repetitive responses
+def remove_repetitions(response):
+    sentences = response.split('. ')
+    unique_sentences = []
+    seen_sentences = set()
+    for sentence in sentences:
+        if sentence not in seen_sentences:
+            seen_sentences.add(sentence)
+            unique_sentences.append(sentence)
+    return '. '.join(unique_sentences)
+
+# Chat function that integrates retrieval and generation
+def chat_system(query):
+    relevant_contexts = fetch_relevant_context(query)
+    combined_context = " ".join(relevant_contexts)
+    response = create_response(query, context=combined_context)
+    clean_response = remove_repetitions(response)
+    return clean_response
+
+# Predefined questions
+faq = [
+    "What is the largest ocean on Earth?",
+    "Which is the highest mountain above sea level?",
+    "Where is the largest tropical rainforest located?",
+    "Who wrote Romeo and Juliet?"
+]
+
+# Display questions and take user input
+def main():
+    print("Please select a question:")
+    for i, question in enumerate(faq):
+        print(f"{i + 1}. {question}")
+
+    selected_index = int(input("Enter the number of your selected question: ")) - 1
+
+    if 0 <= selected_index < len(faq):
+        user_query = faq[selected_index]
+        response = chat_system(user_query)
+        print(f"Response: {response}")
+    else:
+        print("Invalid selection. Please restart and select a valid question number.")
+
+# Run the main function
+if __name__ == "__main__":
+    main()
