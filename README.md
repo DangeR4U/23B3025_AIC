@@ -1,5 +1,5 @@
 # 23B3025_AIC
-make sure to download and install all the libraries by using pip command. 
+Make sure to download and install all the libraries by using pip command. 
    Question 3)
 Corpus file used in the code : glove.6B.50d.txt
 download link:  
